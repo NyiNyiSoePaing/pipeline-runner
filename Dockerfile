@@ -1,5 +1,5 @@
 # Use a modern, stable Docker-in-Docker base image
-FROM docker:28.5-dind
+FROM docker:24.0-dind
 
 # Set environment variables to reduce noise and avoid Python warnings
 ENV PYTHONUNBUFFERED=1 \
@@ -7,26 +7,18 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
 # Install core tools: Python, pip, Git, SSH client, curl, jq
-RUN apk add --no-cache --update \
-    #   bash \
+RUN apk add --no-cache \
+      bash \
       git \
       curl \
       jq \
       python3 \
       py3-pip \
-    #   ca-certificates \
-      openssh-client-default \
-      gcc \
-      musl-dev \
-      python3-dev \
-      libffi-dev \
-      openssl-dev \
-      cargo \
-      make
+      ca-certificates \
+      openssh-client-default
 
 # Install AWS CLI (v1 for compatibility; use awscli==2.x for v2 via pip)
 RUN pip install --break-system-packages awscli
-
 
 # Disable SSH host key checking for automation (CI/CD safe)
 RUN mkdir -p /root/.ssh && \
@@ -38,42 +30,10 @@ RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/st
       -o /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl
 
-# Install Azure CLI
-RUN python3 -m venv /opt/venv \
-    && . /opt/venv/bin/activate \
-    && pip install --upgrade pip \
-    && pip install --no-cache-dir azure-cli \
-    && deactivate
-
-# Clean up unnecessary build tools
-RUN apk del \
-  gcc \
-  musl-dev \
-  python3-dev \
-  libffi-dev \
-  openssl-dev \
-  cargo \
-  make \
-  && rm -rf /var/cache/apk/*
-
-# Create a non-root user set up permissions and add folders the non root user can't create
-ARG USERNAME=dev
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-
-RUN addgroup -g 1000 $USERNAME \
-  && adduser -u 1000 -G $USERNAME -h /home/$USERNAME -D $USERNAME\
-  && mkdir -p /home/$USERNAME/.azure \
-  && chown -R $USERNAME:$USERNAME /home/$USERNAME
-
-# Update PATH to include the virtual environment
-ENV PATH="/opt/venv/bin:$PATH"
 # Verify everything
 RUN docker --version && \
-    python3 --version && \
-    pip --version && \
     aws --version && \
-    kubectl version
+    kubectl version --client --output=yaml
 
-# Default to bash shell
-CMD ["bash"]
+# Default to ash shell
+CMD ["ash"]
