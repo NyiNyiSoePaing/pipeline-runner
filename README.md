@@ -17,7 +17,7 @@
 | Tool / Package | Version | Source |
 |----------------|----------|---------|
 | **Docker CLI** | `28.5.1` | From base image |
-| **AWS CLI** | `2.27.25` | Installed via `pip install awscli` |
+| **Azure CLI** | `2.27.25` | Installed via `pip install azure-cli` |
 | **kubectl** | `v1.34.1` | Downloaded from official Kubernetes releases |
 | **kustomize** | `v5.7.1` | Bundled with kubectl |
 | **OpenSSH Client** | latest (Alpine repo, `openssh-client-default`) | 
@@ -28,7 +28,7 @@
 ## ⚙️ Image Characteristics
 - **OS Base:** Alpine Linux (lightweight, ~250 MB total)
 - **Container Type:** Docker-in-Docker (`dind`)
-- **Default Shell:** `/bin/bash`
+- **Default Shell:** `/bin/ash`
 - **SSH Strict Host Key Checking:** Disabled for automation
 
 ---
@@ -38,5 +38,5 @@ To verify the installation inside a running container:
 
 ```bash
 docker --version        # Docker version 28.5.1
-aws --version           # aws-cli/2.27.25
+az version          # "azure-cli": "2.78.0",
 kubectl version --client # Client Version: v1.34.1 , Kustomize Version: v5.7.1

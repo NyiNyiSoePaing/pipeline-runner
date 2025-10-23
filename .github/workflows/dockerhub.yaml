@@ -36,5 +36,5 @@ jobs:
       - name: ✅ Verify Docker Image
         run: |
           echo "🧪 Checking installed tools..."
-          docker run --rm nnsp/pipeline-runner:latest aws --version
+          docker run --rm nnsp/pipeline-runner:latest az version
           docker run --rm nnsp/pipeline-runner:latest kubectl version --client=true
