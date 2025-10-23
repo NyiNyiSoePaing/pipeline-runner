@@ -1,24 +1,15 @@
 # Use a modern, stable Docker-in-Docker base image
-FROM docker:24.0-dind
-
-# Set environment variables to reduce noise and avoid Python warnings
-ENV PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+FROM docker:28.5-dind
 
 # Install core tools: Python, pip, Git, SSH client, curl, jq
 RUN apk add --no-cache \
-      bash \
       git \
       curl \
       jq \
-      python3 \
-      py3-pip \
-      ca-certificates \
       openssh-client-default
 
-# Install AWS CLI (v1 for compatibility; use awscli==2.x for v2 via pip)
-RUN pip install --break-system-packages awscli
+# Install AWS CLI V2
+RUN apk add --no-cache  aws-cli
 
 # Disable SSH host key checking for automation (CI/CD safe)
 RUN mkdir -p /root/.ssh && \
@@ -30,12 +21,11 @@ RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/st
       -o /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl
 
+
 # Verify everything
 RUN docker --version && \
-    python3 --version && \
-    pip --version && \
     aws --version && \
-    kubectl version --client --output=yaml
+    kubectl version --client 
 
-# Default to bash shell
-CMD ["bash"]
+# Default to ash shell
+CMD ["ash"]
